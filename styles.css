@@ -189,21 +189,26 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 .mini-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 1px;
+  grid-auto-rows: 26px;
+  gap: 0;
   font-size: 11px;
 }
 .mini-grid .dow {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
   color: var(--ink-faint);
   font-weight: 500;
-  padding: 4px 0 6px;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 .mini-grid .day {
-  aspect-ratio: 1;
-  display: grid; place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
   border-radius: 50%;
   cursor: pointer;
   transition: background 0.1s;
