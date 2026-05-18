@@ -88,8 +88,11 @@ const state = {
   events: [],
   cursor:   _nav.cursor   || _today,
   selected: _nav.selected || _today,
-  view:     _nav.view     || "month"
+  view:     _nav.view || "month"
 };
+
+// On mobile, day view is not in the nav — fall back to month
+if (window.innerWidth <= 600 && state.view === "day") state.view = "month";
 
 /* ============================================================
    Date helpers
@@ -1071,8 +1074,11 @@ function bindTopbar() {
     if (stripToday) {
       stripToday.addEventListener("click", () => {
         const t = new Date();
-        state.cursor = toISO(t); state.selected = toISO(t);
-        saveNav(); renderAll();
+        state.cursor = toISO(t);
+        state.selected = toISO(t);
+        state.view = "month";
+        saveNav();
+        renderAll();
       });
     }
   }
