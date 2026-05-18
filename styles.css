@@ -1099,8 +1099,18 @@ body.sidebar-open .sidebar-scrim { display: block; }
 /* Mobile view strip: hidden by default, shown on phone */
 .mobile-view-strip { display: none; }
 
-/* Notif banner: never in desktop grid flow */
-#notif-banner { display: none; }
+/* Banners: never in desktop grid flow */
+#notif-banner, #me-banner { display: none; }
+
+.me-banner-btn {
+  padding: 7px 20px;
+  border-radius: 8px;
+  border: 2px solid;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
 
 /* Phone */
 @media (max-width: 600px) {

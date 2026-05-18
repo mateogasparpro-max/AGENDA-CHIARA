@@ -200,10 +200,34 @@ function renderMiniCal() {
    Render: people sidebar
    ============================================================ */
 function renderMeList() {
+  // Sidebar section — hide entirely once chosen
+  const section = document.getElementById("me-section");
+  const me = getMe();
+  if (section) section.style.display = me ? "none" : "";
+
+  // Mobile "qui es-tu" banner
+  const mobileBanner = document.getElementById("me-banner");
+  if (mobileBanner) {
+    mobileBanner.style.display = (!me && window.innerWidth <= 860) ? "flex" : "none";
+    const list = mobileBanner.querySelector(".me-banner-btns");
+    if (list) {
+      list.innerHTML = "";
+      state.people.forEach(person => {
+        const btn = document.createElement("button");
+        btn.className = "me-banner-btn";
+        btn.style.borderColor = person.color;
+        btn.style.color = person.color;
+        btn.textContent = person.name;
+        btn.addEventListener("click", () => { setMe(person.id); renderMeList(); renderNotifBtn(); });
+        list.appendChild(btn);
+      });
+    }
+  }
+
+  // Sidebar list
   const list = document.getElementById("me-list");
   if (!list) return;
   list.innerHTML = "";
-  const me = getMe();
   state.people.forEach(person => {
     const btn = document.createElement("button");
     btn.className = "me-btn" + (me === person.id ? " active" : "");
@@ -214,10 +238,7 @@ function renderMeList() {
     label.textContent = person.name;
     btn.appendChild(dot);
     btn.appendChild(label);
-    btn.addEventListener("click", () => {
-      setMe(person.id);
-      renderMeList();
-    });
+    btn.addEventListener("click", () => { setMe(person.id); renderMeList(); renderNotifBtn(); });
     list.appendChild(btn);
   });
 }
