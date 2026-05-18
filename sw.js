@@ -4,7 +4,7 @@
    Changer CACHE_VERSION à chaque déploiement pour forcer la MAJ.
    ============================================================ */
 
-const CACHE_VERSION = "v33";
+const CACHE_VERSION = "v34";
 const CACHE_NAME    = `agenda-cache-${CACHE_VERSION}`;
 
 /* ---- Install : skipWaiting pour activer immédiatement ---- */
