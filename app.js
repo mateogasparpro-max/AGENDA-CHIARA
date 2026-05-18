@@ -16,7 +16,7 @@ const firebaseConfig = {
   appId: "1:215480654293:web:fd4cb180b6616a3747455c"
 };
 const firebaseApp = initializeApp(firebaseConfig);
-const db = getDatabase(firebaseApp);
+const db = getDatabase(firebaseApp, "https://agenda-36cf4-default-rtdb.europe-west1.firebasedatabase.app");
 const DB_REF = ref(db, "agenda");
 
 const NAV_KEY = "agenda-nav-v1";
@@ -1093,6 +1093,13 @@ function renderAll() {
 
 document.addEventListener("DOMContentLoaded", () => {
   bindTopbar();
+
+  // Afficher l'agenda avec les données par défaut en attendant Firebase
+  const def = defaultState();
+  state.people = def.people;
+  state.events  = def.events;
+  renderAll();
+
   onValue(DB_REF, (snapshot) => {
     const data = snapshot.val();
     const toArr = (v) => v ? Object.values(v) : [];
@@ -1100,12 +1107,11 @@ document.addEventListener("DOMContentLoaded", () => {
       state.people = toArr(data.people);
       state.events  = toArr(data.events);
     } else {
-      // Première ouverture : initialiser avec les données par défaut
-      const def = defaultState();
-      state.people = def.people;
-      state.events  = def.events;
+      // Première ouverture : sauvegarder les données par défaut dans Firebase
       saveState();
     }
     renderAll();
+  }, (error) => {
+    console.error("Firebase error:", error);
   });
 });
