@@ -1143,12 +1143,6 @@ function showStatus(msg, isError) {
 document.addEventListener("DOMContentLoaded", () => {
   bindTopbar();
 
-  // Données par défaut visibles pendant le chargement Firebase
-  const def = defaultState();
-  state.people = def.people;
-  state.events  = def.events;
-  renderAll();
-
   let firstLoad = true;
 
   DB_REF.on("value", (snapshot) => {
