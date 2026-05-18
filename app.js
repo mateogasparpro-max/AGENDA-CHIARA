@@ -277,20 +277,26 @@ function renderMeList() {
     }
   }
 
-  // Mobile banner: always show on mobile (selection or compact chosen state)
+  // Mobile banner
   const mobileBanner = document.getElementById("me-banner");
   if (mobileBanner) {
     const isMobile = window.innerWidth <= 860;
-    mobileBanner.classList.remove('hidden');
-    mobileBanner.style.display = isMobile ? "flex" : "none";
+    const hasPeople = state.people.length > 0;
 
-    // Clear and rebuild banner content
+    // Only show if mobile AND people data is loaded
+    const shouldShow = isMobile && (hasPeople || (me && mePerson));
+    mobileBanner.style.display = shouldShow ? "flex" : "none";
+
+    if (!shouldShow) return;
+
     mobileBanner.innerHTML = "";
 
     if (me && mePerson) {
-      // Compact chosen state
+      // Compact: "Je suis Chiara · Modifier"
       mobileBanner.style.flexDirection = "row";
       mobileBanner.style.padding = "8px 16px";
+      mobileBanner.style.alignItems = "center";
+      mobileBanner.style.gap = "10px";
 
       const dot = document.createElement("span");
       dot.className = "me-dot";
@@ -301,7 +307,7 @@ function renderMeList() {
       label.textContent = "Je suis " + mePerson.name;
 
       const editBtn = document.createElement("button");
-      editBtn.style.cssText = "font-size:11px; color:#666; padding:2px 8px; border-radius:5px; border:1px solid #ccc; background:#fff; cursor:pointer;";
+      editBtn.style.cssText = "font-size:11px; color:#666; padding:3px 10px; border-radius:5px; border:1px solid #ccc; background:#fff; cursor:pointer;";
       editBtn.textContent = "Modifier";
       editBtn.addEventListener("click", () => { localStorage.removeItem(ME_KEY); renderMeList(); renderNotifBtn(); });
 
@@ -309,9 +315,11 @@ function renderMeList() {
       mobileBanner.appendChild(label);
       mobileBanner.appendChild(editBtn);
     } else {
-      // Selection state
+      // Selection: "Qui es-tu ? [Chiara] [Matéo]"
       mobileBanner.style.flexDirection = "column";
       mobileBanner.style.padding = "10px 16px";
+      mobileBanner.style.alignItems = "center";
+      mobileBanner.style.gap = "10px";
 
       const title = document.createElement("span");
       title.style.cssText = "font-size:12px; font-weight:600; color:#333;";
