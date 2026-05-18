@@ -1,10 +1,10 @@
 /* ============================================================
    Service Worker — AGENDA CHIARA
-   Stratégie : Network-first avec fallback cache.
-   Changer CACHE_VERSION à chaque déploiement pour forcer la MAJ.
+   Stratégie : Network-first sans cache HTTP (cache: "no-store")
+   pour forcer la MAJ même quand GitHub Pages cache le HTML.
    ============================================================ */
 
-const CACHE_VERSION = "v35";
+const CACHE_VERSION = "v36";
 const CACHE_NAME    = `agenda-cache-${CACHE_VERSION}`;
 
 /* ---- Install : skipWaiting pour activer immédiatement ---- */
@@ -25,12 +25,12 @@ self.addEventListener("activate", evt => {
   );
 });
 
-/* ---- Fetch : réseau d'abord, cache en fallback ---- */
+/* ---- Fetch : réseau d'abord en ignorant le cache HTTP, fallback cache SW ---- */
 self.addEventListener("fetch", evt => {
   if (evt.request.method !== "GET") return;
 
   evt.respondWith(
-    fetch(evt.request)
+    fetch(evt.request, { cache: "no-store" })
       .then(response => {
         if (response && response.ok) {
           const clone = response.clone();
