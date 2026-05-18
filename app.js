@@ -181,7 +181,8 @@ function renderMiniCal() {
     el.addEventListener("click", () => {
       state.selected = toISO(d);
       state.cursor = toISO(d);
-      saveState();
+      state.view = "day";
+      saveNav();
       renderAll();
     });
     grid.appendChild(el);
@@ -427,12 +428,12 @@ function renderCalendar() {
     }
     cell.appendChild(evList);
 
-    // cell click → open new event modal on that date
+    // cell click → show day popover with events
     cell.addEventListener("click", (e) => {
       if (e.target.closest(".event") || e.target.closest(".more-link") || e.target.closest(".add-here")) return;
       state.selected = iso;
       renderMiniCal();
-      openEventModal(null, iso);
+      openDayPopover(iso, cell);
     });
 
     // drag/drop targets
