@@ -184,6 +184,7 @@ function renderMiniCal() {
     el.addEventListener("click", () => {
       state.selected = toISO(d);
       state.cursor = toISO(d);
+      state.view = "day";
       saveNav();
       renderAll();
     });
@@ -1076,7 +1077,7 @@ function bindTopbar() {
         const t = new Date();
         state.cursor = toISO(t);
         state.selected = toISO(t);
-        state.view = "month";
+        state.view = "week";
         saveNav();
         renderAll();
       });
