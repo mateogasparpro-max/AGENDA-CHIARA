@@ -1050,6 +1050,7 @@ function bindTopbar() {
   document.getElementById("nav-today").addEventListener("click", () => {
     const t = new Date();
     state.cursor = toISO(t); state.selected = toISO(t);
+    state.view = "day";
     saveState(); renderAll();
   });
   document.getElementById("mini-prev").addEventListener("click", () => {
