@@ -4,7 +4,7 @@
    pour forcer la MAJ même quand GitHub Pages cache le HTML.
    ============================================================ */
 
-const CACHE_VERSION = "v41";
+const CACHE_VERSION = "v42";
 const CACHE_NAME    = `agenda-cache-${CACHE_VERSION}`;
 
 /* ---- Install : skipWaiting pour activer immédiatement ---- */
@@ -12,16 +12,16 @@ self.addEventListener("install", () => {
   self.skipWaiting();
 });
 
-/* ---- Activate : supprime les anciens caches et prend le contrôle ---- */
+/* ---- Activate : supprime anciens caches, prend le contrôle, force reload ---- */
 self.addEventListener("activate", evt => {
   evt.waitUntil(
-    caches.keys().then(names =>
-      Promise.all(
-        names
-          .filter(n => n !== CACHE_NAME)
-          .map(n => caches.delete(n))
-      )
-    ).then(() => self.clients.claim())
+    caches.keys()
+      .then(names => Promise.all(
+        names.filter(n => n !== CACHE_NAME).map(n => caches.delete(n))
+      ))
+      .then(() => self.clients.claim())
+      .then(() => self.clients.matchAll({ type: "window" }))
+      .then(clients => clients.forEach(client => client.navigate(client.url)))
   );
 });
 
