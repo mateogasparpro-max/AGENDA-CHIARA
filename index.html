@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AGENDA — Agenda partagé</title>
-  <link rel="stylesheet" href="styles.css?v=14" />
+  <link rel="stylesheet" href="styles.css?v=15" />
 </head>
 <body>
   <div class="app">
@@ -44,6 +44,11 @@
         Nouvel événement
       </button>
     </header>
+
+    <!-- ===== Mobile notif banner ===== -->
+    <div id="notif-banner" style="display:none; background:#fff8e1; border-bottom:1px solid #ffe082; padding:8px 16px; font-size:12px; text-align:center; cursor:pointer; gap:6px; align-items:center; justify-content:center;">
+      🔔 <span>Appuie ici pour activer les notifications</span>
+    </div>
 
     <!-- ===== Mobile view strip ===== -->
     <div class="mobile-view-strip" id="mobile-view-strip">
@@ -117,6 +122,6 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-  <script src="app.js?v=14"></script>
+  <script src="app.js?v=15"></script>
 </body>
 </html>

@@ -1081,23 +1081,33 @@ function showStatus(msg, isError) {
    Notifications
    ============================================================ */
 function renderNotifBtn() {
+  // Sidebar button
   const container = document.getElementById("notif-btn-wrap");
-  if (!container) return;
-  // Masquer si déjà accordé
-  if ("Notification" in window && Notification.permission === "granted") {
-    container.style.display = "none";
-    return;
+  if (container) {
+    const granted = "Notification" in window && Notification.permission === "granted";
+    container.style.display = granted ? "none" : "";
   }
-  container.style.display = "";
+  // Mobile banner
+  const banner = document.getElementById("notif-banner");
+  if (banner) {
+    const granted = "Notification" in window && Notification.permission === "granted";
+    banner.style.display = granted ? "none" : "flex";
+  }
 }
 
 function requestNotifPermission() {
   if (!("Notification" in window)) {
-    // Safari iOS sans PWA
     alert("Sur Safari iPhone/iPad, ajoutez d'abord l'app à votre écran d'accueil (icône Partager → « Sur l'écran d'accueil »), puis rouvrez-la pour activer les notifications.");
     return;
   }
-  Notification.requestPermission().then(() => renderNotifBtn());
+  Notification.requestPermission().then(permission => {
+    renderNotifBtn();
+    if (permission === "granted") {
+      new Notification("🔔 Notifications activées !", {
+        body: "Tu recevras une notification à chaque nouvel événement."
+      });
+    }
+  });
 }
 
 function notifyNewEvent(ev, people) {
@@ -1116,9 +1126,10 @@ document.addEventListener("DOMContentLoaded", () => {
   renderNotifBtn();
 
   const notifBtn = document.getElementById("notif-btn");
-  if (notifBtn) {
-    notifBtn.addEventListener("click", requestNotifPermission);
-  }
+  if (notifBtn) notifBtn.addEventListener("click", requestNotifPermission);
+
+  const notifBanner = document.getElementById("notif-banner");
+  if (notifBanner) notifBanner.addEventListener("click", requestNotifPermission);
 
   let firstLoad = true;
   let knownEventIds = null; // null = premier chargement, pas encore initialisé
