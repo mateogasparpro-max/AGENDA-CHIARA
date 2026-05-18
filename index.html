@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Agenda" />
-  <link rel="stylesheet" href="styles.css?v=34" />
+  <link rel="stylesheet" href="styles.css?v=35" />
 </head>
 <body>
   <div class="app">
@@ -58,6 +58,11 @@
     <!-- ===== Mobile notif banner ===== -->
     <div id="notif-banner" style="background:#fff8e1; border-bottom:1px solid #ffe082; padding:8px 16px; font-size:12px; text-align:center; cursor:pointer; gap:6px; align-items:center; justify-content:center;">
       🔔 <span>Appuie ici pour activer les notifications</span>
+    </div>
+
+    <!-- ===== Test push banner (temporaire) ===== -->
+    <div id="test-push-banner" style="background:#e8f5e9; border-bottom:1px solid #a5d6a7; padding:6px 16px; text-align:center;">
+      <button id="test-push-btn-mobile" style="padding:6px 14px; border-radius:8px; border:1px solid #43a047; background:#43a047; color:#fff; font-size:12px; font-weight:600; cursor:pointer;">📤 Tester push ntfy</button>
     </div>
 
     <!-- ===== Mobile view strip ===== -->
@@ -142,7 +147,7 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-  <script src="app.js?v=34"></script>
+  <script src="app.js?v=35"></script>
   <script>
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("sw.js").catch(console.warn);

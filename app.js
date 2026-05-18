@@ -1310,11 +1310,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const notifBtn = document.getElementById("notif-btn");
   if (notifBtn) notifBtn.addEventListener("click", requestNotifPermission);
 
-  const testPushBtn = document.getElementById("test-push-btn");
-  if (testPushBtn) testPushBtn.addEventListener("click", async () => {
+  async function runTestPush() {
     const me = getMe();
     const targets = state.people.filter(p => !me || p.id !== me);
-    showStatus("⏳ Envoi test ntfy… (me=" + (me||"null") + " targets=" + targets.length + ")", false);
+    showStatus("⏳ me=" + (me||"null") + " targets=" + targets.length, false);
     for (const t of targets) {
       const topic = NTFY_TOPIC[t.id];
       if (!topic) { showStatus("✗ Pas de topic pour " + t.id, true); continue; }
@@ -1322,12 +1321,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const res = await fetch(`${NTFY_BASE}/${topic}`, {
           method: "POST",
           headers: { "Title": "Test push depuis l'app", "Content-Type": "text/plain; charset=utf-8" },
-          body: "Test envoyé à " + t.name + " via " + topic
+          body: "Test → " + t.name + " via " + topic
         });
-        showStatus(res.ok ? "✓ Test OK → " + t.name + " (" + topic + ")" : "✗ Erreur " + res.status, res.ok ? false : true);
-      } catch(e) { showStatus("✗ Fetch échoué : " + e.message, true); }
+        showStatus(res.ok ? "✓ OK → " + t.name + " (" + topic + ")" : "✗ Erreur " + res.status, !res.ok);
+      } catch(e) { showStatus("✗ " + e.message, true); }
     }
-  });
+  }
+
+  const testPushBtnMobile = document.getElementById("test-push-btn-mobile");
+  if (testPushBtnMobile) testPushBtnMobile.addEventListener("click", runTestPush);
+
+  const testPushBtn = document.getElementById("test-push-btn");
+  if (testPushBtn) testPushBtn.addEventListener("click", runTestPush);
 
   const notifBanner = document.getElementById("notif-banner");
   if (notifBanner) notifBanner.addEventListener("click", requestNotifPermission);
