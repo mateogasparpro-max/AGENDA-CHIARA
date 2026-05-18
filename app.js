@@ -72,7 +72,10 @@ function saveNav() {
   try { localStorage.setItem(NAV_KEY, JSON.stringify({ cursor: state.cursor, selected: state.selected, view: state.view })); } catch(e) {}
 }
 function saveState() {
-  DB_REF.set({ people: state.people, events: state.events }).catch(console.error);
+  DB_REF.set({ people: state.people, events: state.events }).catch((err) => {
+    console.error("Firebase write error:", err);
+    showStatus("✗ Erreur sauvegarde : " + err.code, true);
+  });
   saveNav();
 }
 
@@ -1085,14 +1088,32 @@ function renderAll() {
   else renderDay();
 }
 
+function showStatus(msg, isError) {
+  let el = document.getElementById("fb-status");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "fb-status";
+    el.style.cssText = "position:fixed;bottom:12px;left:50%;transform:translateX(-50%);padding:7px 16px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;transition:opacity 1s;";
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.background = isError ? "#ef5350" : "#43a047";
+  el.style.color = "#fff";
+  el.style.opacity = "1";
+  clearTimeout(el._t);
+  if (!isError) el._t = setTimeout(() => { el.style.opacity = "0"; }, 3000);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   bindTopbar();
 
-  // Afficher l'agenda avec les données par défaut en attendant Firebase
+  // Données par défaut visibles pendant le chargement Firebase
   const def = defaultState();
   state.people = def.people;
   state.events  = def.events;
   renderAll();
+
+  let firstLoad = true;
 
   DB_REF.on("value", (snapshot) => {
     const data = snapshot.val();
@@ -1100,11 +1121,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (data && (data.people || data.events)) {
       state.people = toArr(data.people);
       state.events  = toArr(data.events);
+      if (firstLoad) { showStatus("✓ Synchronisé", false); firstLoad = false; }
     } else {
+      // Première utilisation : écrire les données par défaut
       saveState();
     }
     renderAll();
   }, (error) => {
     console.error("Firebase error:", error);
+    showStatus("✗ Erreur Firebase : " + error.code, true);
   });
 });
