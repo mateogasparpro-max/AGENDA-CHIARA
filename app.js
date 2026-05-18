@@ -1083,7 +1083,8 @@ function showStatus(msg, isError) {
 function renderNotifBtn() {
   const container = document.getElementById("notif-btn-wrap");
   if (!container) return;
-  if (!("Notification" in window) || Notification.permission === "granted") {
+  // Masquer si déjà accordé
+  if ("Notification" in window && Notification.permission === "granted") {
     container.style.display = "none";
     return;
   }
@@ -1091,7 +1092,11 @@ function renderNotifBtn() {
 }
 
 function requestNotifPermission() {
-  if (!("Notification" in window)) return;
+  if (!("Notification" in window)) {
+    // Safari iOS sans PWA
+    alert("Sur Safari iPhone/iPad, ajoutez d'abord l'app à votre écran d'accueil (icône Partager → « Sur l'écran d'accueil »), puis rouvrez-la pour activer les notifications.");
+    return;
+  }
   Notification.requestPermission().then(() => renderNotifBtn());
 }
 
