@@ -1058,18 +1058,12 @@ function bindTopbar() {
   });
   document.getElementById("new-event").addEventListener("click", () => openEventModal(null, state.selected));
 
-  // Mobile bottom nav
-  const mobileNav = document.getElementById("mobile-nav");
-  if (mobileNav) {
-    mobileNav.querySelectorAll("button").forEach(btn => {
+  // Mobile view strip
+  const mobileStrip = document.getElementById("mobile-view-strip");
+  if (mobileStrip) {
+    mobileStrip.querySelectorAll("button").forEach(btn => {
       btn.addEventListener("click", () => {
-        const a = btn.dataset.action;
-        if (a === "today") {
-          const t = new Date();
-          state.cursor = toISO(t); state.selected = toISO(t);
-        } else {
-          state.view = a;
-        }
+        state.view = btn.dataset.view;
         saveNav(); renderAll();
       });
     });
@@ -1093,11 +1087,10 @@ function bindTopbar() {
 }
 
 function renderMobileNav() {
-  const nav = document.getElementById("mobile-nav");
-  if (!nav) return;
-  nav.querySelectorAll("button").forEach(btn => {
-    const a = btn.dataset.action;
-    btn.classList.toggle("active", a === state.view || (a === "month" && !["week"].includes(state.view)));
+  const strip = document.getElementById("mobile-view-strip");
+  if (!strip) return;
+  strip.querySelectorAll("button").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.view === state.view);
   });
 }
 
