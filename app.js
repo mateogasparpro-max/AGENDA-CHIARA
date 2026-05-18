@@ -1310,29 +1310,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const notifBtn = document.getElementById("notif-btn");
   if (notifBtn) notifBtn.addEventListener("click", requestNotifPermission);
 
-  async function runTestPush() {
-    const me = getMe();
-    const targets = state.people.filter(p => !me || p.id !== me);
-    showStatus("⏳ me=" + (me||"null") + " targets=" + targets.length, false);
-    for (const t of targets) {
-      const topic = NTFY_TOPIC[t.name];
-      if (!topic) { showStatus("✗ Pas de topic pour " + t.name + " (id=" + t.id + ")", true); continue; }
-      try {
-        const res = await fetch(`${NTFY_BASE}/${topic}`, {
-          method: "POST",
-          headers: { "Title": "Test push depuis l'app", "Content-Type": "text/plain; charset=utf-8" },
-          body: "Test → " + t.name + " via " + topic
-        });
-        showStatus(res.ok ? "✓ OK → " + t.name + " (" + topic + ")" : "✗ Erreur " + res.status, !res.ok);
-      } catch(e) { showStatus("✗ " + e.message, true); }
-    }
-  }
-
-  const testPushBtnMobile = document.getElementById("test-push-btn-mobile");
-  if (testPushBtnMobile) testPushBtnMobile.addEventListener("click", runTestPush);
-
-  const testPushBtn = document.getElementById("test-push-btn");
-  if (testPushBtn) testPushBtn.addEventListener("click", runTestPush);
 
   const notifBanner = document.getElementById("notif-banner");
   if (notifBanner) notifBanner.addEventListener("click", requestNotifPermission);
