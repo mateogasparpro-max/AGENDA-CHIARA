@@ -281,7 +281,8 @@ function renderMeList() {
   const mobileBanner = document.getElementById("me-banner");
   if (mobileBanner) {
     const isMobile = window.innerWidth <= 860;
-    mobileBanner.classList.toggle('hidden', !isMobile);
+    mobileBanner.classList.remove('hidden');
+    mobileBanner.style.display = isMobile ? "flex" : "none";
 
     // Clear and rebuild banner content
     mobileBanner.innerHTML = "";
@@ -1233,7 +1234,8 @@ function renderNotifBtn() {
   // Mobile banner
   const banner = document.getElementById("notif-banner");
   if (banner) {
-    banner.classList.toggle('hidden', granted || window.innerWidth > 860);
+    banner.classList.remove('hidden');
+    banner.style.display = (!granted && window.innerWidth <= 860) ? "flex" : "none";
     const span = banner.querySelector("span");
     if (span) {
       if (!supported)               span.textContent = "Notifications non supportées";
