@@ -1077,7 +1077,6 @@ function bindTopbar() {
         const t = new Date();
         state.cursor = toISO(t);
         state.selected = toISO(t);
-        state.view = "week";
         saveNav();
         renderAll();
       });
