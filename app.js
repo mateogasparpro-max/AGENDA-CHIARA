@@ -17,8 +17,17 @@ const DB_REF = firebase.database().ref("agenda");
 const NAV_KEY = "agenda-nav-v1";
 const ME_KEY  = "agenda-me-v1"; // which person am I on this device
 
+const NTFY_ME_KEY = "agenda-ntfy-me-v1"; // "chiara" | "mateo" — cached at identity pick
+
 function getMe() { return localStorage.getItem(ME_KEY) || null; }
 function setMe(personId) { localStorage.setItem(ME_KEY, personId); }
+
+// Cache ntfy key without relying on accent-stripping regex (avoids encoding issues)
+function setMyNtfyKey(personName) {
+  const lower = personName.toLowerCase(); // "matéo" still contains "mat"; "chiara" still "chiara"
+  if (lower.includes("chiara")) localStorage.setItem(NTFY_ME_KEY, "chiara");
+  else if (lower.includes("mat"))  localStorage.setItem(NTFY_ME_KEY, "mateo");
+}
 
 /* ============================================================
    ntfy.sh push — background notifications (free, no server)
@@ -36,25 +45,32 @@ const ALL_NTFY = [
 ];
 
 function myNtfyTopic() {
-  const me = getMe();
-  if (!me) return null;
-  const p = state.people.find(p => p.id === me);
-  if (!p) return null;
-  const n = p.name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-  if (n.includes("chiara")) return "agenda36cf4-chiara-9m3k";
-  if (n.includes("mateo"))  return "agenda36cf4-mateo-9m3k";
-  return null;
+  // Use cached key — set when user picks identity, no state.people dependency
+  const key = localStorage.getItem(NTFY_ME_KEY);
+  if (!key) {
+    // Fallback: try to derive from state.people (migration for existing sessions)
+    const me = getMe();
+    if (!me || !state.people.length) return null;
+    const p = state.people.find(p => p.id === me);
+    if (!p) return null;
+    setMyNtfyKey(p.name); // cache for future calls
+    return localStorage.getItem(NTFY_ME_KEY)
+      ? ALL_NTFY.find(n => n.key === localStorage.getItem(NTFY_ME_KEY))?.topic ?? null
+      : null;
+  }
+  return ALL_NTFY.find(n => n.key === key)?.topic ?? null;
 }
 
 async function pushViaApi(ev, isNew) {
   if (!isNew) return;
-  const myTopic = myNtfyTopic(); // null = identité inconnue → envoyer à tous
+  const myTopic = myNtfyTopic(); // null = identité inconnue → envoyer à tous sauf soi
   const time = ev.start ? `${ev.start}${ev.end ? "–" + ev.end : ""}` : "Toute la journée";
   const body = `${ev.date} · ${time}`;
+  let sent = 0;
   for (const { key, topic } of ALL_NTFY) {
     if (topic === myTopic) continue; // ne pas se notifier soi-même
     try {
-      await fetch(`${NTFY_BASE}/${topic}`, {
+      const r = await fetch(`${NTFY_BASE}/${topic}`, {
         method: "POST",
         headers: {
           "Title": ev.title,
@@ -63,8 +79,10 @@ async function pushViaApi(ev, isNew) {
         },
         body: `📅 ${body}`
       });
-    } catch(e) { /* silencieux */ }
+      if (r.ok) sent++;
+    } catch(e) { /* réseau indisponible */ }
   }
+  if (sent > 0) showStatus("🔔 Notification envoyée", false);
 }
 
 const DEFAULT_COLORS = [
@@ -270,7 +288,7 @@ function renderMeList() {
       const editBtn = document.createElement("button");
       editBtn.className = "me-edit-btn";
       editBtn.textContent = "Modifier";
-      editBtn.addEventListener("click", () => { localStorage.removeItem(ME_KEY); renderMeList(); renderNotifBtn(); });
+      editBtn.addEventListener("click", () => { localStorage.removeItem(ME_KEY); localStorage.removeItem(NTFY_ME_KEY); renderMeList(); renderNotifBtn(); });
       row.appendChild(dot);
       row.appendChild(label);
       row.appendChild(editBtn);
@@ -287,7 +305,7 @@ function renderMeList() {
         label.textContent = person.name;
         btn.appendChild(dot);
         btn.appendChild(label);
-        btn.addEventListener("click", () => { setMe(person.id); renderMeList(); renderNotifBtn(); });
+        btn.addEventListener("click", () => { setMe(person.id); setMyNtfyKey(person.name); renderMeList(); renderNotifBtn(); });
         list.appendChild(btn);
       });
     }
@@ -325,7 +343,7 @@ function renderMeList() {
       const editBtn = document.createElement("button");
       editBtn.style.cssText = "font-size:11px; color:#666; padding:3px 10px; border-radius:5px; border:1px solid #ccc; background:#fff; cursor:pointer;";
       editBtn.textContent = "Modifier";
-      editBtn.addEventListener("click", () => { localStorage.removeItem(ME_KEY); renderMeList(); renderNotifBtn(); });
+      editBtn.addEventListener("click", () => { localStorage.removeItem(ME_KEY); localStorage.removeItem(NTFY_ME_KEY); renderMeList(); renderNotifBtn(); });
 
       mobileBanner.appendChild(dot);
       mobileBanner.appendChild(label);
@@ -349,7 +367,7 @@ function renderMeList() {
         btn.style.borderColor = person.color;
         btn.style.color = person.color;
         btn.textContent = person.name;
-        btn.addEventListener("click", () => { setMe(person.id); renderMeList(); renderNotifBtn(); });
+        btn.addEventListener("click", () => { setMe(person.id); setMyNtfyKey(person.name); renderMeList(); renderNotifBtn(); });
         btnsRow.appendChild(btn);
       });
 
@@ -1330,6 +1348,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
       state.people = newPeople;
       state.events = newEvents;
+
+      // Migration: if identity is known but ntfy key not yet cached, compute it now
+      if (!localStorage.getItem(NTFY_ME_KEY)) {
+        const me = getMe();
+        if (me) {
+          const p = newPeople.find(p => p.id === me);
+          if (p) setMyNtfyKey(p.name);
+        }
+      }
+
       if (firstLoad) { showStatus("✓ Synchronisé", false); firstLoad = false; }
     } else {
       knownEventIds = new Set();
