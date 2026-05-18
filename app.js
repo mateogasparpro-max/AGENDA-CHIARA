@@ -1109,17 +1109,36 @@ function showStatus(msg, isError) {
    Notifications
    ============================================================ */
 function renderNotifBtn() {
-  // Sidebar button
+  const supported = "Notification" in window;
+  const permission = supported ? Notification.permission : "unsupported";
+  const granted = permission === "granted";
+
+  // Sidebar button area
   const container = document.getElementById("notif-btn-wrap");
   if (container) {
-    const granted = "Notification" in window && Notification.permission === "granted";
     container.style.display = granted ? "none" : "";
+    const btn = document.getElementById("notif-btn");
+    if (btn) {
+      if (!supported)               btn.textContent = "Notifications non supportées";
+      else if (permission === "denied") btn.textContent = "🚫 Bloquées — débloquer dans les réglages";
+      else                          btn.textContent = "🔔 Activer les notifications";
+    }
   }
-  // Mobile banner — only on small screens
+
+  // Test button (sidebar, visible only when granted)
+  const testBtn = document.getElementById("notif-test-btn");
+  if (testBtn) testBtn.style.display = granted ? "" : "none";
+
+  // Mobile banner
   const banner = document.getElementById("notif-banner");
   if (banner) {
-    const granted = "Notification" in window && Notification.permission === "granted";
     banner.style.display = (!granted && window.innerWidth <= 860) ? "flex" : "none";
+    const span = banner.querySelector("span");
+    if (span) {
+      if (!supported)               span.textContent = "Notifications non supportées";
+      else if (permission === "denied") span.textContent = "Notifications bloquées — débloquer dans les réglages";
+      else                          span.textContent = "Appuie ici pour activer les notifications";
+    }
   }
 }
 
@@ -1128,14 +1147,23 @@ function requestNotifPermission() {
     alert("Sur Safari iPhone/iPad, ajoutez d'abord l'app à votre écran d'accueil (icône Partager → « Sur l'écran d'accueil »), puis rouvrez-la pour activer les notifications.");
     return;
   }
+  if (Notification.permission === "denied") {
+    alert("Les notifications sont bloquées. Va dans les réglages de ton navigateur → Notifications pour les débloquer pour ce site.");
+    return;
+  }
   Notification.requestPermission().then(permission => {
     renderNotifBtn();
     if (permission === "granted") {
       new Notification("🔔 Notifications activées !", {
-        body: "Tu recevras une notification à chaque nouvel événement."
+        body: "Tu recevras une notification quand l'autre personne ajoute un événement."
       });
     }
   });
+}
+
+function testNotification() {
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  new Notification("✅ Test réussi !", { body: "Les notifications fonctionnent sur cet appareil." });
 }
 
 function notifyNewEvent(ev, people) {
@@ -1160,6 +1188,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const notifBanner = document.getElementById("notif-banner");
   if (notifBanner) notifBanner.addEventListener("click", requestNotifPermission);
+
+  const testBtn = document.getElementById("notif-test-btn");
+  if (testBtn) testBtn.addEventListener("click", testNotification);
 
   let firstLoad = true;
   let knownEventIds = null; // null = premier chargement, pas encore initialisé
