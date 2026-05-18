@@ -92,7 +92,7 @@ const state = {
 };
 
 // On mobile, day view is not in the nav — fall back to month
-if (window.innerWidth <= 600 && state.view === "day") state.view = "month";
+if (window.innerWidth <= 600 && state.view === "day") state.view = "week";
 
 /* ============================================================
    Date helpers
@@ -1077,6 +1077,7 @@ function bindTopbar() {
         const t = new Date();
         state.cursor = toISO(t);
         state.selected = toISO(t);
+        state.view = "day";
         saveNav();
         renderAll();
       });
