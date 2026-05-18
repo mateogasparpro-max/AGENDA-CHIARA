@@ -1059,6 +1059,23 @@ function bindTopbar() {
   });
   document.getElementById("new-event").addEventListener("click", () => openEventModal(null, state.selected));
 
+  // Mobile bottom nav
+  const mobileNav = document.getElementById("mobile-nav");
+  if (mobileNav) {
+    mobileNav.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const a = btn.dataset.action;
+        if (a === "today") {
+          const t = new Date();
+          state.cursor = toISO(t); state.selected = toISO(t);
+        } else {
+          state.view = a;
+        }
+        saveNav(); renderAll();
+      });
+    });
+  }
+
   document.addEventListener("keydown", (e) => {
     if (e.target.matches("input, textarea, [contenteditable]")) return;
     if (e.key === "ArrowLeft") shiftCursor(-1);
@@ -1076,9 +1093,19 @@ function bindTopbar() {
   });
 }
 
+function renderMobileNav() {
+  const nav = document.getElementById("mobile-nav");
+  if (!nav) return;
+  nav.querySelectorAll("button").forEach(btn => {
+    const a = btn.dataset.action;
+    btn.classList.toggle("active", a === state.view || (a === "month" && !["week","day"].includes(state.view)));
+  });
+}
+
 function renderAll() {
   renderTopbar();
   renderMiniCal();
+  renderMobileNav();
   renderPeople();
   // show right view
   document.getElementById("view-month").style.display = state.view === "month" ? "" : "none";
