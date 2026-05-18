@@ -1325,14 +1325,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const newPeople = toArr(data.people);
       const newEvents = toArr(data.events);
 
-      // Notifier les nouveaux événements (uniquement après le premier chargement)
-      if (knownEventIds !== null) {
-        newEvents.forEach(ev => {
-          if (!knownEventIds.has(ev.id)) {
-            notifyNewEvent(ev, newPeople);
-          }
-        });
-      }
       knownEventIds = new Set(newEvents.map(e => e.id));
 
       state.people = newPeople;

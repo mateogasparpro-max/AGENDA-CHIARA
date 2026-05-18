@@ -4,7 +4,7 @@
    pour forcer la MAJ même quand GitHub Pages cache le HTML.
    ============================================================ */
 
-const CACHE_VERSION = "v45";
+const CACHE_VERSION = "v46";
 const CACHE_NAME    = `agenda-cache-${CACHE_VERSION}`;
 
 /* ---- Install : skipWaiting pour activer immédiatement ---- */
