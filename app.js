@@ -20,6 +20,37 @@ const ME_KEY  = "agenda-me-v1"; // which person am I on this device
 function getMe() { return localStorage.getItem(ME_KEY) || null; }
 function setMe(personId) { localStorage.setItem(ME_KEY, personId); }
 
+/* ============================================================
+   ntfy.sh push — background notifications (free, no server)
+   Topics: one per person. Each device subscribes to the OTHER.
+   ============================================================ */
+const NTFY_BASE  = "https://ntfy.sh";
+const NTFY_TOPIC = { p1: "agenda36cf4-chiara-9m3k", p2: "agenda36cf4-mateo-9m3k" };
+
+async function pushViaApi(ev, isNew) {
+  if (!isNew) return;              // only notify on creation
+  const me = getMe();
+  if (!me) return;                 // identity not set
+  // Send to ALL other people's topics
+  const targets = state.people.filter(p => p.id !== me);
+  if (!targets.length) return;
+  const person = state.people.find(p => p.id === ev.personId);
+  const who  = person ? person.name : "";
+  const time = ev.start ? `${ev.start}${ev.end ? "–" + ev.end : ""}` : "Toute la journée";
+  const body = `${who} · ${ev.date} · ${time}`;
+  for (const t of targets) {
+    const topic = NTFY_TOPIC[t.id];
+    if (!topic) continue;
+    try {
+      await fetch(`${NTFY_BASE}/${topic}`, {
+        method: "POST",
+        headers: { "Title": `📅 ${ev.title}`, "Content-Type": "text/plain; charset=utf-8" },
+        body
+      });
+    } catch(e) { console.warn("ntfy push failed:", e); }
+  }
+}
+
 const DEFAULT_COLORS = [
   "#f48fb1", "#f06292", "#ec407a", "#ba68c8",
   "#9575cd", "#7986cb", "#5b8ed8", "#4fc3f7",
@@ -967,6 +998,7 @@ function openEventModal(eventOrNull, dateISO, overrides) {
       if (idx >= 0) state.events[idx] = ev;
     }
     saveState();
+    pushViaApi(ev, isNew);
     close();
     renderAll();
   };
