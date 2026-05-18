@@ -29,7 +29,7 @@ function setMe(personId) { localStorage.setItem(ME_KEY, personId); }
 const justSavedByMe = new Set();
 
 const NTFY_BASE  = "https://ntfy.sh";
-const NTFY_TOPIC = { "Chiara": "agenda36cf4-chiara-9m3k", "Matéo": "agenda36cf4-mateo-9m3k" };
+const NTFY_TOPIC = { "Chiara": "agenda36cf4-mateo-9m3k", "Matéo": "agenda36cf4-chiara-9m3k" };
 
 async function pushViaApi(ev, isNew) {
   if (!isNew) return;
