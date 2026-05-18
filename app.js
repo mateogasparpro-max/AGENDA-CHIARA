@@ -1,9 +1,25 @@
 /* ============================================================
    AGENDA CHIARA — shared calendar
-   Vanilla JS. State persists in localStorage.
+   Vanilla JS. State persists in Firebase Realtime Database.
    ============================================================ */
 
-const STORAGE_KEY = "agenda-chiara-v3";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCoscMg-1FjkucmBq2Xv2N_TvA1SVFEpjw",
+  authDomain: "agenda-36cf4.firebaseapp.com",
+  databaseURL: "https://agenda-36cf4-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "agenda-36cf4",
+  storageBucket: "agenda-36cf4.firebasestorage.app",
+  messagingSenderId: "215480654293",
+  appId: "1:215480654293:web:fd4cb180b6616a3747455c"
+};
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getDatabase(firebaseApp);
+const DB_REF = ref(db, "agenda");
+
+const NAV_KEY = "agenda-nav-v1";
 
 const DEFAULT_COLORS = [
   "#f48fb1", "#f06292", "#ec407a", "#ba68c8",
@@ -54,25 +70,29 @@ function defaultState() {
   };
 }
 
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultState();
-    const parsed = JSON.parse(raw);
-    if (!parsed.people || !parsed.events) return defaultState();
-    if (!parsed.view) parsed.view = "month";
-    return parsed;
-  } catch (e) {
-    return defaultState();
-  }
+function loadNav() {
+  try { return JSON.parse(localStorage.getItem(NAV_KEY) || "{}"); } catch(e) { return {}; }
+}
+function saveNav() {
+  try { localStorage.setItem(NAV_KEY, JSON.stringify({ cursor: state.cursor, selected: state.selected, view: state.view })); } catch(e) {}
 }
 function saveState() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  const toObj = (arr) => Object.fromEntries(arr.map((v, i) => [i, v]));
+  set(DB_REF, { people: toObj(state.people), events: toObj(state.events) }).catch(console.error);
+  saveNav();
 }
 
 function uid() { return Math.random().toString(36).slice(2, 10); }
 
-const state = loadState();
+const _nav = loadNav();
+const _today = new Date().toISOString().slice(0, 10);
+const state = {
+  people: [],
+  events: [],
+  cursor:   _nav.cursor   || _today,
+  selected: _nav.selected || _today,
+  view:     _nav.view     || "month"
+};
 
 /* ============================================================
    Date helpers
@@ -1073,5 +1093,19 @@ function renderAll() {
 
 document.addEventListener("DOMContentLoaded", () => {
   bindTopbar();
-  renderAll();
+  onValue(DB_REF, (snapshot) => {
+    const data = snapshot.val();
+    const toArr = (v) => v ? Object.values(v) : [];
+    if (data && (data.people || data.events)) {
+      state.people = toArr(data.people);
+      state.events  = toArr(data.events);
+    } else {
+      // Première ouverture : initialiser avec les données par défaut
+      const def = defaultState();
+      state.people = def.people;
+      state.events  = def.events;
+      saveState();
+    }
+    renderAll();
+  });
 });
