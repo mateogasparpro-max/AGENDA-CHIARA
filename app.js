@@ -24,6 +24,10 @@ function setMe(personId) { localStorage.setItem(ME_KEY, personId); }
    ntfy.sh push — background notifications (free, no server)
    Topics: one per person. Each device subscribes to the OTHER.
    ============================================================ */
+// IDs des événements que CE device vient de sauvegarder (pour éviter
+// de notifier l'auteur dans son propre navigateur via Firebase listener)
+const justSavedByMe = new Set();
+
 const NTFY_BASE  = "https://ntfy.sh";
 const NTFY_TOPIC = { p1: "agenda36cf4-chiara-9m3k", p2: "agenda36cf4-mateo-9m3k" };
 
@@ -951,7 +955,7 @@ function openEventModal(eventOrNull, dateISO, overrides) {
     allDay: overrides?.allDay ?? false,
     start: overrides?.start ?? "09:00",
     end:   overrides?.end ?? "10:00",
-    personId: state.people[0].id,
+    personId: getMe() || state.people[0].id,
     note: ""
   };
   modalCtx = { ev, isNew };
@@ -1052,8 +1056,10 @@ function openEventModal(eventOrNull, dateISO, overrides) {
     ev.end = backdrop.querySelector("#m-end").value;
     ev.note = backdrop.querySelector("#m-note").value;
 
-    if (isNew) state.events.push(ev);
-    else {
+    if (isNew) {
+      state.events.push(ev);
+      justSavedByMe.add(ev.id); // marquer avant Firebase retour
+    } else {
       const idx = state.events.findIndex(x => x.id === ev.id);
       if (idx >= 0) state.events[idx] = ev;
     }
@@ -1275,9 +1281,8 @@ function requestNotifPermission() {
 
 function notifyNewEvent(ev, people) {
   if (!("Notification" in window) || Notification.permission !== "granted") return;
-  // Ne pas notifier pour ses propres événements
-  const me = getMe();
-  if (me && ev.personId === me) return;
+  // Ne pas notifier si c'est CE device qui vient de sauvegarder l'event
+  if (justSavedByMe.has(ev.id)) { justSavedByMe.delete(ev.id); return; }
   const person = people.find(p => p.id === ev.personId);
   const who = person ? person.name : "";
   const time = ev.start ? ev.start + (ev.end ? " – " + ev.end : "") : "Toute la journée";
