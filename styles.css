@@ -595,13 +595,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 }
 
 .week-allday, .day-allday {
-  display: flex;
-  border-bottom: 1px solid var(--line);
-  background: var(--surface);
-  min-height: 30px;
-  max-height: 100px;
-  overflow-y: auto;
-  flex: 0 0 auto;
+  display: none;
 }
 .week-allday .wk-allday-col, .day-allday .day-allday-col {
   flex: 1;
@@ -1128,11 +1122,15 @@ body.sidebar-open .sidebar-scrim { display: block; }
   .dow-row .dow-cell { padding: 6px 6px; font-size: 9px; letter-spacing: 0.04em; }
 
   /* Week head: smaller */
-  .week-head .wk-day-head { padding: 8px 4px; }
-  .week-head .wk-day-head .wk-num { font-size: 16px; width: 26px; height: 26px; }
-  .time-gutter, .time-gutter-head, .time-gutter-allday { width: 42px; flex: 0 0 42px; }
-  .timed-event { font-size: 11px; padding: 2px 4px 2px 5px; }
+  .week-head .wk-day-head { padding: 6px 2px; }
+  .week-head .wk-day-head .wk-dow { font-size: 9px; }
+  .week-head .wk-day-head .wk-num { font-size: 13px; width: 22px; height: 22px; border-radius: 6px; }
+  .time-gutter, .time-gutter-head, .time-gutter-allday { width: 36px; flex: 0 0 36px; font-size: 9px; }
+  .timed-event { font-size: 10px; padding: 2px 3px; }
   .timed-event .te-person { display: none; }
+  /* No horizontal scroll in week view */
+  .week-body { overflow-x: hidden; }
+  .wk-day-col { min-width: 0; }
 
   /* Day head */
   .day-head .day-head-cell { padding: 10px 14px; }
