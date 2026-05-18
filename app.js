@@ -15,6 +15,10 @@ firebase.initializeApp({
 const DB_REF = firebase.database().ref("agenda");
 
 const NAV_KEY = "agenda-nav-v1";
+const ME_KEY  = "agenda-me-v1"; // which person am I on this device
+
+function getMe() { return localStorage.getItem(ME_KEY) || null; }
+function setMe(personId) { localStorage.setItem(ME_KEY, personId); }
 
 const DEFAULT_COLORS = [
   "#f48fb1", "#f06292", "#ec407a", "#ba68c8",
@@ -195,6 +199,29 @@ function renderMiniCal() {
 /* ============================================================
    Render: people sidebar
    ============================================================ */
+function renderMeList() {
+  const list = document.getElementById("me-list");
+  if (!list) return;
+  list.innerHTML = "";
+  const me = getMe();
+  state.people.forEach(person => {
+    const btn = document.createElement("button");
+    btn.className = "me-btn" + (me === person.id ? " active" : "");
+    const dot = document.createElement("span");
+    dot.className = "me-dot";
+    dot.style.background = person.color;
+    const label = document.createElement("span");
+    label.textContent = person.name;
+    btn.appendChild(dot);
+    btn.appendChild(label);
+    btn.addEventListener("click", () => {
+      setMe(person.id);
+      renderMeList();
+    });
+    list.appendChild(btn);
+  });
+}
+
 function renderPeople() {
   const list = document.getElementById("people-list");
   list.innerHTML = "";
@@ -1051,6 +1078,7 @@ function renderAll() {
   renderTopbar();
   renderMiniCal();
   renderMobileNav();
+  renderMeList();
   renderPeople();
   // show right view
   document.getElementById("view-month").style.display = state.view === "month" ? "" : "none";
@@ -1112,12 +1140,14 @@ function requestNotifPermission() {
 
 function notifyNewEvent(ev, people) {
   if (!("Notification" in window) || Notification.permission !== "granted") return;
+  // Ne pas notifier pour ses propres événements
+  const me = getMe();
+  if (me && ev.personId === me) return;
   const person = people.find(p => p.id === ev.personId);
   const who = person ? person.name : "";
   const time = ev.start ? ev.start + (ev.end ? " – " + ev.end : "") : "Toute la journée";
   new Notification("📅 " + ev.title, {
-    body: (who ? who + "  ·  " : "") + ev.date + (ev.start ? "  ·  " + time : ""),
-    icon: "https://mateogasparpro-max.github.io/AGENDA-CHIARA/favicon.ico"
+    body: (who ? who + "  ·  " : "") + ev.date + (ev.start ? "  ·  " + time : "")
   });
 }
 

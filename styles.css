@@ -257,6 +257,34 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 }
 .section-title button:hover { color: var(--ink); }
 
+.me-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.me-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  background: none;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
+  text-align: left;
+}
+.me-btn:hover { background: var(--bg); color: var(--ink); }
+.me-btn.active { border-color: var(--line-strong); color: var(--ink); background: var(--bg); }
+.me-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex: 0 0 10px;
+}
+
 .people-list {
   display: flex;
   flex-direction: column;
