@@ -3,10 +3,7 @@
    Vanilla JS. State persists in Firebase Realtime Database.
    ============================================================ */
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
-
-const firebaseConfig = {
+firebase.initializeApp({
   apiKey: "AIzaSyCoscMg-1FjkucmBq2Xv2N_TvA1SVFEpjw",
   authDomain: "agenda-36cf4.firebaseapp.com",
   databaseURL: "https://agenda-36cf4-default-rtdb.europe-west1.firebasedatabase.app",
@@ -14,10 +11,8 @@ const firebaseConfig = {
   storageBucket: "agenda-36cf4.firebasestorage.app",
   messagingSenderId: "215480654293",
   appId: "1:215480654293:web:fd4cb180b6616a3747455c"
-};
-const firebaseApp = initializeApp(firebaseConfig);
-const db = getDatabase(firebaseApp, "https://agenda-36cf4-default-rtdb.europe-west1.firebasedatabase.app");
-const DB_REF = ref(db, "agenda");
+});
+const DB_REF = firebase.database().ref("agenda");
 
 const NAV_KEY = "agenda-nav-v1";
 
@@ -77,8 +72,7 @@ function saveNav() {
   try { localStorage.setItem(NAV_KEY, JSON.stringify({ cursor: state.cursor, selected: state.selected, view: state.view })); } catch(e) {}
 }
 function saveState() {
-  const toObj = (arr) => Object.fromEntries(arr.map((v, i) => [i, v]));
-  set(DB_REF, { people: toObj(state.people), events: toObj(state.events) }).catch(console.error);
+  DB_REF.set({ people: state.people, events: state.events }).catch(console.error);
   saveNav();
 }
 
@@ -1100,14 +1094,12 @@ document.addEventListener("DOMContentLoaded", () => {
   state.events  = def.events;
   renderAll();
 
-  onValue(DB_REF, (snapshot) => {
+  DB_REF.on("value", (snapshot) => {
     const data = snapshot.val();
-    const toArr = (v) => v ? Object.values(v) : [];
-    if (data && (data.people || data.events)) {
-      state.people = toArr(data.people);
-      state.events  = toArr(data.events);
+    if (data && data.people && data.events) {
+      state.people = data.people;
+      state.events  = data.events;
     } else {
-      // Première ouverture : sauvegarder les données par défaut dans Firebase
       saveState();
     }
     renderAll();
