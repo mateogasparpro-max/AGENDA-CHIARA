@@ -1036,8 +1036,9 @@ body.sidebar-open .sidebar-scrim { display: block; }
 /* Smaller tablet / large phone: sidebar becomes a drawer */
 @media (max-width: 860px) {
   .app {
-    grid-template-columns: 1fr;
-    grid-template-rows: 56px auto 1fr;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
   }
   .menu-btn { display: inline-flex; }
   .brand-mark { display: none; }
@@ -1053,7 +1054,7 @@ body.sidebar-open .sidebar-scrim { display: block; }
     box-shadow: var(--shadow-lg);
   }
   body.sidebar-open .sidebar { transform: translateX(0); }
-  .calendar-wrap { grid-column: 1 / -1; grid-row: 3; }
+  .calendar-wrap { flex: 1; min-height: 0; }
 
   /* Hide brand text, keep just "AGENDA" */
   .brand span:first-of-type { font-size: 14px; }
