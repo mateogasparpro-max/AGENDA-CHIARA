@@ -231,19 +231,60 @@ function renderMiniCal() {
    Render: people sidebar
    ============================================================ */
 function renderMeList() {
-  // Sidebar section — hide entirely once chosen
-  const section = document.getElementById("me-section");
   const me = getMe();
-  if (section) section.classList.toggle('hidden', !!me);
+  const mePerson = me ? state.people.find(p => p.id === me) : null;
 
-  // Mobile "qui es-tu" banner
+  // Sidebar section — always visible, content changes
+  const section = document.getElementById("me-section");
+  if (section) section.classList.remove('hidden');
+
+  const list = document.getElementById("me-list");
+  if (list) {
+    list.innerHTML = "";
+    if (me && mePerson) {
+      // Compact: show chosen identity + Modifier button
+      const row = document.createElement("div");
+      row.className = "me-chosen-row";
+      const dot = document.createElement("span");
+      dot.className = "me-dot";
+      dot.style.background = mePerson.color;
+      const label = document.createElement("span");
+      label.className = "me-chosen-name";
+      label.textContent = mePerson.name;
+      const editBtn = document.createElement("button");
+      editBtn.className = "me-edit-btn";
+      editBtn.textContent = "Modifier";
+      editBtn.addEventListener("click", () => { localStorage.removeItem(ME_KEY); renderMeList(); renderNotifBtn(); });
+      row.appendChild(dot);
+      row.appendChild(label);
+      row.appendChild(editBtn);
+      list.appendChild(row);
+    } else {
+      // Show selection buttons
+      state.people.forEach(person => {
+        const btn = document.createElement("button");
+        btn.className = "me-btn";
+        const dot = document.createElement("span");
+        dot.className = "me-dot";
+        dot.style.background = person.color;
+        const label = document.createElement("span");
+        label.textContent = person.name;
+        btn.appendChild(dot);
+        btn.appendChild(label);
+        btn.addEventListener("click", () => { setMe(person.id); renderMeList(); renderNotifBtn(); });
+        list.appendChild(btn);
+      });
+    }
+  }
+
+  // Mobile banner: show only when identity not chosen
   const mobileBanner = document.getElementById("me-banner");
   if (mobileBanner) {
     const showBanner = !me && window.innerWidth <= 860;
     mobileBanner.classList.toggle('hidden', !showBanner);
-    const list = mobileBanner.querySelector(".me-banner-btns");
-    if (list) {
-      list.innerHTML = "";
+    const btns = mobileBanner.querySelector(".me-banner-btns");
+    if (btns) {
+      btns.innerHTML = "";
       state.people.forEach(person => {
         const btn = document.createElement("button");
         btn.className = "me-banner-btn";
@@ -251,28 +292,10 @@ function renderMeList() {
         btn.style.color = person.color;
         btn.textContent = person.name;
         btn.addEventListener("click", () => { setMe(person.id); renderMeList(); renderNotifBtn(); });
-        list.appendChild(btn);
+        btns.appendChild(btn);
       });
     }
   }
-
-  // Sidebar list
-  const list = document.getElementById("me-list");
-  if (!list) return;
-  list.innerHTML = "";
-  state.people.forEach(person => {
-    const btn = document.createElement("button");
-    btn.className = "me-btn" + (me === person.id ? " active" : "");
-    const dot = document.createElement("span");
-    dot.className = "me-dot";
-    dot.style.background = person.color;
-    const label = document.createElement("span");
-    label.textContent = person.name;
-    btn.appendChild(dot);
-    btn.appendChild(label);
-    btn.addEventListener("click", () => { setMe(person.id); renderMeList(); renderNotifBtn(); });
-    list.appendChild(btn);
-  });
 }
 
 function renderPeople() {
@@ -281,27 +304,18 @@ function renderPeople() {
 
   state.people.forEach(person => {
     const row = document.createElement("div");
-    row.className = "person" + (person.hidden ? " muted" : "");
+    row.className = "person";
 
-    // swatch
+    // swatch (color picker only)
     const sw = document.createElement("div");
     sw.className = "swatch";
     sw.style.background = person.color;
     sw.title = "Changer la couleur";
     sw.addEventListener("click", (e) => { e.stopPropagation(); openColorPicker(person, sw); });
 
-    // name (non-editable, fixed)
     const name = document.createElement("div");
     name.className = "person-name";
     name.textContent = person.name;
-
-    // toggle visibility on row click
-    row.addEventListener("click", () => {
-      person.hidden = !person.hidden;
-      saveState();
-      renderPeople();
-      renderCalendar();
-    });
 
     row.appendChild(sw);
     row.appendChild(name);

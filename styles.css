@@ -286,6 +286,28 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
   border-radius: 50%;
   flex: 0 0 10px;
 }
+.me-chosen-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+}
+.me-chosen-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.me-edit-btn {
+  font-size: 11px;
+  color: var(--ink-faint);
+  padding: 2px 6px;
+  border-radius: 5px;
+  border: 1px solid var(--line);
+  background: none;
+  cursor: pointer;
+}
+.me-edit-btn:hover { color: var(--ink); border-color: var(--line-strong); }
 
 .people-list {
   display: flex;
