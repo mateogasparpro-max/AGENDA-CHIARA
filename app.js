@@ -29,7 +29,12 @@ function setMe(personId) { localStorage.setItem(ME_KEY, personId); }
 const justSavedByMe = new Set();
 
 const NTFY_BASE  = "https://ntfy.sh";
-const NTFY_TOPIC = { "Chiara": "agenda36cf4-chiara-9m3k", "Matéo": "agenda36cf4-mateo-9m3k" };
+function getNtfyTopic(person) {
+  const n = (person.name || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  if (n.includes("chiara")) return "agenda36cf4-chiara-9m3k";
+  if (n.includes("mateo"))  return "agenda36cf4-mateo-9m3k";
+  return null;
+}
 
 async function pushViaApi(ev, isNew) {
   if (!isNew) return;
@@ -42,7 +47,7 @@ async function pushViaApi(ev, isNew) {
   const time = ev.start ? `${ev.start}${ev.end ? "–" + ev.end : ""}` : "Toute la journée";
   const body = `${who} · ${ev.date} · ${time}`;
   for (const t of targets) {
-    const topic = NTFY_TOPIC[t.name];
+    const topic = getNtfyTopic(t);
     if (!topic) continue;
     try {
       const res = await fetch(`${NTFY_BASE}/${topic}`, {
