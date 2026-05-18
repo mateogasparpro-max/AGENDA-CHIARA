@@ -1140,19 +1140,55 @@ function showStatus(msg, isError) {
   if (!isError) el._t = setTimeout(() => { el.style.opacity = "0"; }, 3000);
 }
 
+/* ============================================================
+   Notifications
+   ============================================================ */
+function requestNotifPermission() {
+  if ("Notification" in window && Notification.permission === "default") {
+    Notification.requestPermission();
+  }
+}
+
+function notifyNewEvent(ev, people) {
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  const person = people.find(p => p.id === ev.personId);
+  const who = person ? person.name : "";
+  const time = ev.start ? ev.start + (ev.end ? " – " + ev.end : "") : "Toute la journée";
+  new Notification("📅 " + ev.title, {
+    body: (who ? who + "  ·  " : "") + ev.date + (ev.start ? "  ·  " + time : ""),
+    icon: "https://mateogasparpro-max.github.io/AGENDA-CHIARA/favicon.ico"
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   bindTopbar();
+  requestNotifPermission();
 
   let firstLoad = true;
+  let knownEventIds = null; // null = premier chargement, pas encore initialisé
 
   DB_REF.on("value", (snapshot) => {
     const data = snapshot.val();
     const toArr = (v) => v ? (Array.isArray(v) ? v : Object.values(v)) : [];
     if (data && (data.people || data.events)) {
-      state.people = toArr(data.people);
-      state.events  = toArr(data.events);
+      const newPeople = toArr(data.people);
+      const newEvents = toArr(data.events);
+
+      // Notifier les nouveaux événements (uniquement après le premier chargement)
+      if (knownEventIds !== null) {
+        newEvents.forEach(ev => {
+          if (!knownEventIds.has(ev.id)) {
+            notifyNewEvent(ev, newPeople);
+          }
+        });
+      }
+      knownEventIds = new Set(newEvents.map(e => e.id));
+
+      state.people = newPeople;
+      state.events = newEvents;
       if (firstLoad) { showStatus("✓ Synchronisé", false); firstLoad = false; }
     } else {
+      knownEventIds = new Set();
       // Première utilisation : écrire les données par défaut
       saveState();
     }
