@@ -32,20 +32,18 @@ const NTFY_BASE  = "https://ntfy.sh";
 const NTFY_TOPIC = { p1: "agenda36cf4-chiara-9m3k", p2: "agenda36cf4-mateo-9m3k" };
 
 async function pushViaApi(ev, isNew) {
-  if (!isNew) return;              // only notify on creation
-  const me = getMe();
-  if (!me) { showStatus("⚠️ Push ignoré : identité non définie", true); return; }
-  // Send to ALL other people's topics
-  const targets = state.people.filter(p => p.id !== me);
-  if (!targets.length) { showStatus("⚠️ Push ignoré : aucune autre personne", true); return; }
+  if (!isNew) return;
+  const me = getMe(); // peut être null si identité pas choisie
+  // Envoyer à tout le monde sauf soi-même (ou à tout le monde si identité inconnue)
+  const targets = state.people.filter(p => !me || p.id !== me);
+  if (!targets.length) return;
   const person = state.people.find(p => p.id === ev.personId);
   const who  = person ? person.name : "";
   const time = ev.start ? `${ev.start}${ev.end ? "–" + ev.end : ""}` : "Toute la journée";
   const body = `${who} · ${ev.date} · ${time}`;
   for (const t of targets) {
     const topic = NTFY_TOPIC[t.id];
-    if (!topic) { console.warn("ntfy: pas de topic pour", t.id); continue; }
-    console.log("ntfy push →", `${NTFY_BASE}/${topic}`, { title: ev.title, body });
+    if (!topic) continue;
     try {
       const res = await fetch(`${NTFY_BASE}/${topic}`, {
         method: "POST",
@@ -58,15 +56,11 @@ async function pushViaApi(ev, isNew) {
         body: `📅 ${body}`
       });
       if (res.ok) {
-        console.log("ntfy OK", res.status);
         showStatus("📤 Notif envoyée à " + t.name, false);
       } else {
-        const txt = await res.text();
-        console.warn("ntfy erreur", res.status, txt);
         showStatus("✗ Push échoué (" + res.status + ")", true);
       }
     } catch(e) {
-      console.warn("ntfy push failed:", e);
       showStatus("✗ Push réseau échoué", true);
     }
   }
