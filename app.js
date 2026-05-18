@@ -234,12 +234,13 @@ function renderMeList() {
   // Sidebar section — hide entirely once chosen
   const section = document.getElementById("me-section");
   const me = getMe();
-  if (section) section.style.display = me ? "none" : "";
+  if (section) section.classList.toggle('hidden', !!me);
 
   // Mobile "qui es-tu" banner
   const mobileBanner = document.getElementById("me-banner");
   if (mobileBanner) {
-    mobileBanner.style.display = (!me && window.innerWidth <= 860) ? "flex" : "none";
+    const showBanner = !me && window.innerWidth <= 860;
+    mobileBanner.classList.toggle('hidden', !showBanner);
     const list = mobileBanner.querySelector(".me-banner-btns");
     if (list) {
       list.innerHTML = "";
@@ -1169,7 +1170,7 @@ function renderNotifBtn() {
   // Sidebar button area
   const container = document.getElementById("notif-btn-wrap");
   if (container) {
-    container.style.display = granted ? "none" : "";
+    container.classList.toggle('hidden', granted);
     const btn = document.getElementById("notif-btn");
     if (btn) {
       if (!supported)               btn.textContent = "Notifications non supportées";
@@ -1182,7 +1183,7 @@ function renderNotifBtn() {
   // Mobile banner
   const banner = document.getElementById("notif-banner");
   if (banner) {
-    banner.style.display = (!granted && window.innerWidth <= 860) ? "flex" : "none";
+    banner.classList.toggle('hidden', granted || window.innerWidth > 860);
     const span = banner.querySelector("span");
     if (span) {
       if (!supported)               span.textContent = "Notifications non supportées";
@@ -1226,6 +1227,7 @@ function notifyNewEvent(ev, people) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  renderMeList();
   bindTopbar();
   renderNotifBtn();
 

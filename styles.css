@@ -1,6 +1,8 @@
 /* AGENDA CHIARA — shared calendar */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+.hidden { display: none !important; }
+
 :root {
   --bg: #fafaf7;
   --surface: #ffffff;
