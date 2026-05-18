@@ -1075,6 +1075,10 @@ function openEventModal(eventOrNull, dateISO, overrides) {
       if (idx >= 0) state.events[idx] = ev;
     }
     saveState();
+    // Envoyer ntfy uniquement si la Notification API n'est pas disponible ou pas accordée
+    // (évite les doublons sur les appareils qui reçoivent déjà la notif browser)
+    const browserNotifWorks = "Notification" in window && Notification.permission === "granted";
+    if (!browserNotifWorks && isNew) pushViaApi(ev, isNew);
     close();
     renderAll();
   };
