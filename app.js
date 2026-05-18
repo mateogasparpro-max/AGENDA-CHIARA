@@ -1096,9 +1096,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   DB_REF.on("value", (snapshot) => {
     const data = snapshot.val();
-    if (data && data.people && data.events) {
-      state.people = data.people;
-      state.events  = data.events;
+    const toArr = (v) => v ? (Array.isArray(v) ? v : Object.values(v)) : [];
+    if (data && (data.people || data.events)) {
+      state.people = toArr(data.people);
+      state.events  = toArr(data.events);
     } else {
       saveState();
     }
