@@ -44,14 +44,31 @@ async function pushViaApi(ev, isNew) {
   const body = `${who} · ${ev.date} · ${time}`;
   for (const t of targets) {
     const topic = NTFY_TOPIC[t.id];
-    if (!topic) continue;
+    if (!topic) { console.warn("ntfy: pas de topic pour", t.id); continue; }
+    console.log("ntfy push →", `${NTFY_BASE}/${topic}`, { title: ev.title, body });
     try {
-      await fetch(`${NTFY_BASE}/${topic}`, {
+      const res = await fetch(`${NTFY_BASE}/${topic}`, {
         method: "POST",
-        headers: { "Title": `📅 ${ev.title}`, "Content-Type": "text/plain; charset=utf-8" },
-        body
+        headers: {
+          "Title": ev.title,
+          "Content-Type": "text/plain; charset=utf-8",
+          "Priority": "default",
+          "Tags": "calendar"
+        },
+        body: `📅 ${body}`
       });
-    } catch(e) { console.warn("ntfy push failed:", e); }
+      if (res.ok) {
+        console.log("ntfy OK", res.status);
+        showStatus("📤 Notif envoyée à " + t.name, false);
+      } else {
+        const txt = await res.text();
+        console.warn("ntfy erreur", res.status, txt);
+        showStatus("✗ Push échoué (" + res.status + ")", true);
+      }
+    } catch(e) {
+      console.warn("ntfy push failed:", e);
+      showStatus("✗ Push réseau échoué", true);
+    }
   }
 }
 
