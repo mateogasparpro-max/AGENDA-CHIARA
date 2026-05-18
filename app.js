@@ -1075,7 +1075,6 @@ function openEventModal(eventOrNull, dateISO, overrides) {
       if (idx >= 0) state.events[idx] = ev;
     }
     saveState();
-    pushViaApi(ev, isNew);
     close();
     renderAll();
   };
