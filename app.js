@@ -181,7 +181,6 @@ function renderMiniCal() {
     el.addEventListener("click", () => {
       state.selected = toISO(d);
       state.cursor = toISO(d);
-      state.view = "day";
       saveNav();
       renderAll();
     });
@@ -1098,7 +1097,7 @@ function renderMobileNav() {
   if (!nav) return;
   nav.querySelectorAll("button").forEach(btn => {
     const a = btn.dataset.action;
-    btn.classList.toggle("active", a === state.view || (a === "month" && !["week","day"].includes(state.view)));
+    btn.classList.toggle("active", a === state.view || (a === "month" && !["week"].includes(state.view)));
   });
 }
 
