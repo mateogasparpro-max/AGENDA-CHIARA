@@ -1061,12 +1061,20 @@ function bindTopbar() {
   // Mobile view strip
   const mobileStrip = document.getElementById("mobile-view-strip");
   if (mobileStrip) {
-    mobileStrip.querySelectorAll("button").forEach(btn => {
+    mobileStrip.querySelectorAll("button[data-view]").forEach(btn => {
       btn.addEventListener("click", () => {
         state.view = btn.dataset.view;
         saveNav(); renderAll();
       });
     });
+    const stripToday = document.getElementById("strip-today");
+    if (stripToday) {
+      stripToday.addEventListener("click", () => {
+        const t = new Date();
+        state.cursor = toISO(t); state.selected = toISO(t);
+        saveNav(); renderAll();
+      });
+    }
   }
 
   document.addEventListener("keydown", (e) => {

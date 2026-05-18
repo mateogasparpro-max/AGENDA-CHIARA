@@ -1081,13 +1081,30 @@ body.sidebar-open .sidebar-scrim { display: block; }
   /* pill wrapper */
   .mobile-view-strip {
     display: flex;
+    align-items: center;
     justify-content: center;
+    gap: 10px;
     grid-column: 1 / -1;
     grid-row: 2;
     background: var(--surface);
     border-bottom: 1px solid var(--line);
-    padding: 8px 0;
+    padding: 8px 12px;
   }
+  /* Hide Aujourd'hui from topbar on mobile */
+  .nav .today-btn { display: none; }
+  /* Aujourd'hui button in strip */
+  .pill-today {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .pill-today:active { opacity: 0.7; }
   /* pill itself: same style as desktop .view-toggle */
   .mobile-view-strip .pill {
     display: flex;
