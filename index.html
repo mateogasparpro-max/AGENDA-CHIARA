@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AGENDA — Agenda partagé</title>
-  <link rel="stylesheet" href="styles.css?v=12" />
+  <link rel="stylesheet" href="styles.css?v=13" />
 </head>
 <body>
   <div class="app">
@@ -78,8 +78,14 @@
         <div class="people-list" id="people-list"></div>
       </section>
 
+      <div id="notif-btn-wrap" style="display:none; padding: 0 12px 12px;">
+        <button id="notif-btn" style="width:100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          🔔 Activer les notifications
+        </button>
+      </div>
+
       <div class="legend-note">
-        Tout est modifiable — cliquez sur un nom pour le renommer, sur la pastille pour changer la couleur, ou sur une journée pour ajouter un événement. Glissez-déposez un événement vers une autre date.
+        Cliquez sur la pastille pour changer la couleur, ou sur une journée pour ajouter un événement. Glissez-déposez un événement vers une autre date.
       </div>
     </aside>
 
@@ -111,6 +117,6 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-  <script src="app.js?v=12"></script>
+  <script src="app.js?v=13"></script>
 </body>
 </html>

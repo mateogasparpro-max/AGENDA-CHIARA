@@ -1080,10 +1080,19 @@ function showStatus(msg, isError) {
 /* ============================================================
    Notifications
    ============================================================ */
-function requestNotifPermission() {
-  if ("Notification" in window && Notification.permission === "default") {
-    Notification.requestPermission();
+function renderNotifBtn() {
+  const container = document.getElementById("notif-btn-wrap");
+  if (!container) return;
+  if (!("Notification" in window) || Notification.permission === "granted") {
+    container.style.display = "none";
+    return;
   }
+  container.style.display = "";
+}
+
+function requestNotifPermission() {
+  if (!("Notification" in window)) return;
+  Notification.requestPermission().then(() => renderNotifBtn());
 }
 
 function notifyNewEvent(ev, people) {
@@ -1099,7 +1108,12 @@ function notifyNewEvent(ev, people) {
 
 document.addEventListener("DOMContentLoaded", () => {
   bindTopbar();
-  requestNotifPermission();
+  renderNotifBtn();
+
+  const notifBtn = document.getElementById("notif-btn");
+  if (notifBtn) {
+    notifBtn.addEventListener("click", requestNotifPermission);
+  }
 
   let firstLoad = true;
   let knownEventIds = null; // null = premier chargement, pas encore initialisé
