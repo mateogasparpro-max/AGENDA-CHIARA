@@ -1146,9 +1146,6 @@ function renderNotifBtn() {
     }
   }
 
-  // Test button (sidebar, visible only when granted)
-  const testBtn = document.getElementById("notif-test-btn");
-  if (testBtn) testBtn.style.display = granted ? "" : "none";
 
   // Mobile banner
   const banner = document.getElementById("notif-banner");
@@ -1182,10 +1179,6 @@ function requestNotifPermission() {
   });
 }
 
-function testNotification() {
-  if (!("Notification" in window) || Notification.permission !== "granted") return;
-  new Notification("✅ Test réussi !", { body: "Les notifications fonctionnent sur cet appareil." });
-}
 
 function notifyNewEvent(ev, people) {
   if (!("Notification" in window) || Notification.permission !== "granted") return;
@@ -1210,8 +1203,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const notifBanner = document.getElementById("notif-banner");
   if (notifBanner) notifBanner.addEventListener("click", requestNotifPermission);
 
-  const testBtn = document.getElementById("notif-test-btn");
-  if (testBtn) testBtn.addEventListener("click", testNotification);
 
   let firstLoad = true;
   let knownEventIds = null; // null = premier chargement, pas encore initialisé
