@@ -277,14 +277,47 @@ function renderMeList() {
     }
   }
 
-  // Mobile banner: show only when identity not chosen
+  // Mobile banner: always show on mobile (selection or compact chosen state)
   const mobileBanner = document.getElementById("me-banner");
   if (mobileBanner) {
-    const showBanner = !me && window.innerWidth <= 860;
-    mobileBanner.classList.toggle('hidden', !showBanner);
-    const btns = mobileBanner.querySelector(".me-banner-btns");
-    if (btns) {
-      btns.innerHTML = "";
+    const isMobile = window.innerWidth <= 860;
+    mobileBanner.classList.toggle('hidden', !isMobile);
+
+    // Clear and rebuild banner content
+    mobileBanner.innerHTML = "";
+
+    if (me && mePerson) {
+      // Compact chosen state
+      mobileBanner.style.flexDirection = "row";
+      mobileBanner.style.padding = "8px 16px";
+
+      const dot = document.createElement("span");
+      dot.className = "me-dot";
+      dot.style.background = mePerson.color;
+
+      const label = document.createElement("span");
+      label.style.cssText = "flex:1; font-size:12px; font-weight:600; color:#333;";
+      label.textContent = "Je suis " + mePerson.name;
+
+      const editBtn = document.createElement("button");
+      editBtn.style.cssText = "font-size:11px; color:#666; padding:2px 8px; border-radius:5px; border:1px solid #ccc; background:#fff; cursor:pointer;";
+      editBtn.textContent = "Modifier";
+      editBtn.addEventListener("click", () => { localStorage.removeItem(ME_KEY); renderMeList(); renderNotifBtn(); });
+
+      mobileBanner.appendChild(dot);
+      mobileBanner.appendChild(label);
+      mobileBanner.appendChild(editBtn);
+    } else {
+      // Selection state
+      mobileBanner.style.flexDirection = "column";
+      mobileBanner.style.padding = "10px 16px";
+
+      const title = document.createElement("span");
+      title.style.cssText = "font-size:12px; font-weight:600; color:#333;";
+      title.textContent = "Qui es-tu ?";
+
+      const btnsRow = document.createElement("div");
+      btnsRow.style.cssText = "display:flex; gap:10px;";
       state.people.forEach(person => {
         const btn = document.createElement("button");
         btn.className = "me-banner-btn";
@@ -292,8 +325,11 @@ function renderMeList() {
         btn.style.color = person.color;
         btn.textContent = person.name;
         btn.addEventListener("click", () => { setMe(person.id); renderMeList(); renderNotifBtn(); });
-        btns.appendChild(btn);
+        btnsRow.appendChild(btn);
       });
+
+      mobileBanner.appendChild(title);
+      mobileBanner.appendChild(btnsRow);
     }
   }
 }
