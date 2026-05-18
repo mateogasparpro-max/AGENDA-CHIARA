@@ -1071,6 +1071,9 @@ body.sidebar-open .sidebar-scrim { display: block; }
 /* Mobile view strip: hidden by default, shown on phone */
 .mobile-view-strip { display: none; }
 
+/* Notif banner: never in desktop grid flow */
+#notif-banner { display: none; }
+
 /* Phone */
 @media (max-width: 600px) {
   .topbar { padding: 0 10px; gap: 6px; }

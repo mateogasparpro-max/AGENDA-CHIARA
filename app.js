@@ -1087,11 +1087,11 @@ function renderNotifBtn() {
     const granted = "Notification" in window && Notification.permission === "granted";
     container.style.display = granted ? "none" : "";
   }
-  // Mobile banner
+  // Mobile banner — only on small screens
   const banner = document.getElementById("notif-banner");
   if (banner) {
     const granted = "Notification" in window && Notification.permission === "granted";
-    banner.style.display = granted ? "none" : "flex";
+    banner.style.display = (!granted && window.innerWidth <= 860) ? "flex" : "none";
   }
 }
 
