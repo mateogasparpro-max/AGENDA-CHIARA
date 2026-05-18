@@ -210,28 +210,10 @@ function renderPeople() {
     sw.title = "Changer la couleur";
     sw.addEventListener("click", (e) => { e.stopPropagation(); openColorPicker(person, sw); });
 
-    // name (editable)
+    // name (non-editable, fixed)
     const name = document.createElement("div");
     name.className = "person-name";
-    name.contentEditable = "true";
-    name.spellcheck = false;
     name.textContent = person.name;
-    name.addEventListener("blur", () => {
-      const v = name.textContent.trim() || "Sans nom";
-      person.name = v;
-      name.textContent = v;
-      saveState();
-      renderCalendar(); // chip labels
-    });
-    name.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") { e.preventDefault(); name.blur(); }
-    });
-
-    // event count
-    const count = document.createElement("span");
-    count.className = "count";
-    const n = state.events.filter(e => e.personId === person.id).length;
-    count.textContent = n;
 
     // toggle visibility on row click
     row.addEventListener("click", () => {
@@ -241,55 +223,10 @@ function renderPeople() {
       renderCalendar();
     });
 
-    // delete
-    const del = document.createElement("button");
-    del.className = "del";
-    del.title = "Supprimer";
-    del.innerHTML = svgIcon("trash");
-    del.addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (state.people.length <= 1) { alert("Garde au moins une personne."); return; }
-      if (!confirm(`Supprimer "${person.name}" ? Ses événements seront réassignés.`)) return;
-      // reassign events
-      const fallback = state.people.find(p => p.id !== person.id);
-      state.events.forEach(ev => { if (ev.personId === person.id) ev.personId = fallback.id; });
-      state.people = state.people.filter(p => p.id !== person.id);
-      saveState(); renderAll();
-    });
-
     row.appendChild(sw);
     row.appendChild(name);
-    row.appendChild(count);
-    row.appendChild(del);
     list.appendChild(row);
   });
-
-  // Add person button
-  const add = document.createElement("button");
-  add.className = "add-person";
-  add.innerHTML = `<span class="plus">+</span><span>Ajouter une personne</span>`;
-  add.addEventListener("click", () => {
-    const usedColors = state.people.map(p => p.color);
-    const color = DEFAULT_COLORS.find(c => !usedColors.includes(c)) || DEFAULT_COLORS[Math.floor(Math.random()*DEFAULT_COLORS.length)];
-    const np = { id: uid(), name: "Nouveau", color, hidden: false };
-    state.people.push(np);
-    saveState();
-    renderPeople();
-    // focus name to edit
-    setTimeout(() => {
-      const rows = list.querySelectorAll(".person-name");
-      const last = rows[rows.length - 1];
-      if (last) {
-        last.focus();
-        const range = document.createRange();
-        range.selectNodeContents(last);
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-      }
-    }, 20);
-  });
-  list.appendChild(add);
 }
 
 let openPopover = null;
