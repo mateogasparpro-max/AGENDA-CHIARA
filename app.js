@@ -34,10 +34,10 @@ const NTFY_TOPIC = { p1: "agenda36cf4-chiara-9m3k", p2: "agenda36cf4-mateo-9m3k"
 async function pushViaApi(ev, isNew) {
   if (!isNew) return;              // only notify on creation
   const me = getMe();
-  if (!me) return;                 // identity not set
+  if (!me) { showStatus("⚠️ Push ignoré : identité non définie", true); return; }
   // Send to ALL other people's topics
   const targets = state.people.filter(p => p.id !== me);
-  if (!targets.length) return;
+  if (!targets.length) { showStatus("⚠️ Push ignoré : aucune autre personne", true); return; }
   const person = state.people.find(p => p.id === ev.personId);
   const who  = person ? person.name : "";
   const time = ev.start ? `${ev.start}${ev.end ? "–" + ev.end : ""}` : "Toute la journée";
