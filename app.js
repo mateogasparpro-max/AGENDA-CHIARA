@@ -29,8 +29,18 @@ function setMe(personId) { localStorage.setItem(ME_KEY, personId); }
 const justSavedByMe = new Set();
 
 const NTFY_BASE  = "https://ntfy.sh";
-function getNtfyTopic(person) {
-  const n = (person.name || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+// Topics fixes — indépendants de state.people
+const ALL_NTFY = [
+  { key: "chiara", topic: "agenda36cf4-chiara-9m3k" },
+  { key: "mateo",  topic: "agenda36cf4-mateo-9m3k"  }
+];
+
+function myNtfyTopic() {
+  const me = getMe();
+  if (!me) return null;
+  const p = state.people.find(p => p.id === me);
+  if (!p) return null;
+  const n = p.name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
   if (n.includes("chiara")) return "agenda36cf4-chiara-9m3k";
   if (n.includes("mateo"))  return "agenda36cf4-mateo-9m3k";
   return null;
@@ -38,36 +48,22 @@ function getNtfyTopic(person) {
 
 async function pushViaApi(ev, isNew) {
   if (!isNew) return;
-  const me = getMe(); // peut être null si identité pas choisie
-  // Envoyer à tout le monde sauf soi-même (ou à tout le monde si identité inconnue)
-  const targets = state.people.filter(p => !me || p.id !== me);
-  if (!targets.length) return;
-  const person = state.people.find(p => p.id === ev.personId);
-  const who  = person ? person.name : "";
+  const myTopic = myNtfyTopic(); // null = identité inconnue → envoyer à tous
   const time = ev.start ? `${ev.start}${ev.end ? "–" + ev.end : ""}` : "Toute la journée";
-  const body = `${who} · ${ev.date} · ${time}`;
-  for (const t of targets) {
-    const topic = getNtfyTopic(t);
-    if (!topic) continue;
+  const body = `${ev.date} · ${time}`;
+  for (const { key, topic } of ALL_NTFY) {
+    if (topic === myTopic) continue; // ne pas se notifier soi-même
     try {
-      const res = await fetch(`${NTFY_BASE}/${topic}`, {
+      await fetch(`${NTFY_BASE}/${topic}`, {
         method: "POST",
         headers: {
           "Title": ev.title,
           "Content-Type": "text/plain; charset=utf-8",
-          "Priority": "default",
-          "Tags": "calendar"
+          "Priority": "default"
         },
         body: `📅 ${body}`
       });
-      if (res.ok) {
-        showStatus("📤 Notif envoyée à " + t.name, false);
-      } else {
-        showStatus("✗ Push échoué (" + res.status + ")", true);
-      }
-    } catch(e) {
-      showStatus("✗ Push réseau échoué", true);
-    }
+    } catch(e) { /* silencieux */ }
   }
 }
 
