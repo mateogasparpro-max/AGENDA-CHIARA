@@ -1340,16 +1340,26 @@ document.addEventListener("DOMContentLoaded", () => {
   DB_REF.on("value", (snapshot) => {
     const data = snapshot.val();
     const toArr = (v) => v ? (Array.isArray(v) ? v : Object.values(v)) : [];
-    if (data && (data.people || data.events)) {
-      const newPeople = toArr(data.people);
-      const newEvents = toArr(data.events);
+    const newPeople = toArr(data && data.people);
+    const newEvents  = toArr(data && data.events);
 
+    if (firstLoad && newPeople.length === 0) {
+      // Base vide (première utilisation OU données effacées) → restaurer les personnes
+      // On remet Chiara & Matéo ; les événements restent vides, à re-saisir
+      const def = defaultState();
+      state.people = def.people;
+      state.events  = newEvents.length > 0 ? newEvents : [];
+      knownEventIds = new Set(state.events.map(e => e.id));
+      saveState();
+      showStatus("✓ Personnes restaurées", false);
+      firstLoad = false;
+    } else if (newPeople.length > 0) {
+      // Données normales
       knownEventIds = new Set(newEvents.map(e => e.id));
-
       state.people = newPeople;
-      state.events = newEvents;
+      state.events  = newEvents;
 
-      // Migration: if identity is known but ntfy key not yet cached, compute it now
+      // Migration ntfy key si pas encore en cache
       if (!localStorage.getItem(NTFY_ME_KEY)) {
         const me = getMe();
         if (me) {
@@ -1359,19 +1369,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (firstLoad) { showStatus("✓ Synchronisé", false); firstLoad = false; }
-    } else if (firstLoad) {
-      // Vraiment première utilisation (base vide) — écrire les données par défaut
-      // Guard: n'écrit que si state est encore vide, jamais si on a déjà des données
-      knownEventIds = new Set();
-      if (state.people.length === 0) {
-        const def = defaultState();
-        state.people = def.people;
-        state.events = def.events;
-        saveState();
-      }
     }
-    // Si data est null ET ce n'est pas le premier chargement → glitch réseau,
-    // on ne touche pas à state pour ne pas écraser les données en mémoire
+    // data null ET pas firstLoad → glitch réseau, on garde state en mémoire sans toucher Firebase
     renderAll();
   }, (error) => {
     console.error("Firebase error:", error);
