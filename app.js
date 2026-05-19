@@ -1359,11 +1359,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (firstLoad) { showStatus("✓ Synchronisé", false); firstLoad = false; }
-    } else {
+    } else if (firstLoad) {
+      // Vraiment première utilisation (base vide) — écrire les données par défaut
+      // Guard: n'écrit que si state est encore vide, jamais si on a déjà des données
       knownEventIds = new Set();
-      // Première utilisation : écrire les données par défaut
-      saveState();
+      if (state.people.length === 0) {
+        const def = defaultState();
+        state.people = def.people;
+        state.events = def.events;
+        saveState();
+      }
     }
+    // Si data est null ET ce n'est pas le premier chargement → glitch réseau,
+    // on ne touche pas à state pour ne pas écraser les données en mémoire
     renderAll();
   }, (error) => {
     console.error("Firebase error:", error);
